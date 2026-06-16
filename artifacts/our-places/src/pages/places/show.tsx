@@ -3,8 +3,7 @@ import { useGetPlace, useDeletePlace, getListPlacesQueryKey, getGetRecentPlacesQ
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Calendar, Edit3, Trash2, ArrowLeft, Image as ImageIcon, Navigation } from "lucide-react";
-import { format } from "date-fns";
+import { MapPin, Edit3, Trash2, ArrowLeft, Image as ImageIcon, Navigation } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +16,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  restaurant: "Restoran",
+  cafe: "Kafe",
+  park: "Park",
+  museum: "Müze",
+  beach: "Sahil",
+  hotel: "Otel",
+  bar: "Bar",
+  attraction: "Gezilecek Yer",
+  other: "Diğer",
+};
 
 export default function PlaceDetail() {
   const { id } = useParams<{ id: string }>();
@@ -37,14 +48,14 @@ export default function PlaceDetail() {
   const handleDelete = () => {
     deleteMutation.mutate({ id: placeId }, {
       onSuccess: () => {
-        toast({ title: "Memory deleted" });
+        toast({ title: "Anı silindi" });
         queryClient.invalidateQueries({ queryKey: getListPlacesQueryKey() });
         queryClient.invalidateQueries({ queryKey: getGetRecentPlacesQueryKey() });
         queryClient.invalidateQueries({ queryKey: getGetStatsQueryKey() });
         setLocation("/places");
       },
       onError: () => {
-        toast({ title: "Failed to delete", variant: "destructive" });
+        toast({ title: "Silinemedi", variant: "destructive" });
       }
     });
   };
@@ -63,8 +74,8 @@ export default function PlaceDetail() {
   if (!place) {
     return (
       <div className="max-w-4xl mx-auto text-center py-20">
-        <h2 className="text-2xl font-serif mb-4">Memory not found</h2>
-        <Button asChild><Link href="/places">Return to Journal</Link></Button>
+        <h2 className="text-2xl font-serif mb-4">Anı bulunamadı</h2>
+        <Button asChild><Link href="/places">Günlüğe Dön</Link></Button>
       </div>
     );
   }
@@ -73,7 +84,7 @@ export default function PlaceDetail() {
     <div className="max-w-4xl mx-auto pb-20 sm:pb-0 animate-in fade-in duration-500">
       <Button variant="ghost" className="mb-6 -ml-4 text-muted-foreground hover:text-foreground" asChild>
         <Link href="/places">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Journal
+          <ArrowLeft className="w-4 h-4 mr-2" /> Günlüğe Dön
         </Link>
       </Button>
 
@@ -88,7 +99,7 @@ export default function PlaceDetail() {
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-accent/10">
               <ImageIcon className="w-16 h-16 text-muted-foreground/20 mb-4" />
-              <p className="text-muted-foreground/50 font-serif italic">No photo attached</p>
+              <p className="text-muted-foreground/50 font-serif italic">Fotoğraf eklenmemiş</p>
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -96,7 +107,7 @@ export default function PlaceDetail() {
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white">
             <div className="flex flex-wrap gap-2 mb-3">
               <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider">
-                {place.category}
+                {CATEGORY_LABELS[place.category] ?? place.category}
               </span>
               {place.rating && (
                 <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
@@ -118,54 +129,48 @@ export default function PlaceDetail() {
           <div className="flex flex-col md:flex-row gap-10">
             <div className="flex-1 space-y-8">
               <div>
-                <h3 className="text-sm uppercase tracking-widest text-muted-foreground mb-4">The Memory</h3>
+                <h3 className="text-sm uppercase tracking-widest text-muted-foreground mb-4">Anı</h3>
                 <p className="text-lg text-foreground/90 font-light leading-relaxed whitespace-pre-wrap">
-                  {place.description || <span className="italic text-muted-foreground">No description written for this memory.</span>}
+                  {place.description || <span className="italic text-muted-foreground">Bu anı için henüz bir açıklama yazılmamış.</span>}
                 </p>
               </div>
 
-              <div className="flex items-center gap-6 text-sm text-muted-foreground pt-6 border-t border-border/40">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-primary" />
-                  Visited on {format(new Date(place.visitedAt), "MMMM d, yyyy")}
+              {(place.lat && place.lng) && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-6 border-t border-border/40">
+                  <Navigation className="w-4 h-4 text-secondary" />
+                  {place.lat.toFixed(4)}, {place.lng.toFixed(4)}
                 </div>
-                {(place.lat && place.lng) && (
-                  <div className="flex items-center gap-2">
-                    <Navigation className="w-4 h-4 text-secondary" />
-                    {place.lat.toFixed(4)}, {place.lng.toFixed(4)}
-                  </div>
-                )}
-              </div>
+              )}
             </div>
 
             <div className="md:w-48 space-y-3 border-t md:border-t-0 md:border-l border-border/40 pt-6 md:pt-0 md:pl-8">
               <Button variant="outline" className="w-full justify-start" asChild>
                 <Link href={`/places/${place.id}/edit`}>
-                  <Edit3 className="w-4 h-4 mr-2" /> Edit Memory
+                  <Edit3 className="w-4 h-4 mr-2" /> Düzenle
                 </Link>
               </Button>
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" className="w-full justify-start">
-                    <Trash2 className="w-4 h-4 mr-2" /> Delete
+                    <Trash2 className="w-4 h-4 mr-2" /> Sil
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>Emin misin?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will permanently delete this memory from your journal. This action cannot be undone.
+                      Bu anı günlüğünden kalıcı olarak silinecek. Bu işlem geri alınamaz.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>Vazgeç</AlertDialogCancel>
                     <AlertDialogAction 
                       onClick={handleDelete}
                       disabled={deleteMutation.isPending}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                      {deleteMutation.isPending ? "Deleting..." : "Delete Memory"}
+                      {deleteMutation.isPending ? "Siliniyor..." : "Anıyı Sil"}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

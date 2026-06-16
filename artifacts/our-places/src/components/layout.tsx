@@ -13,7 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="bg-primary/10 p-2 rounded-full group-hover:bg-primary/20 transition-colors">
               <Heart className="w-5 h-5 text-primary" />
             </div>
-            <span className="font-serif text-xl font-medium tracking-tight text-foreground">Our Places</span>
+            <span className="font-serif text-xl font-medium tracking-tight text-foreground">Bizim Yerlerimiz</span>
           </Link>
 
           <nav className="flex items-center gap-1 sm:gap-4">
@@ -24,14 +24,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             >
               <Link href="/places">
                 <Compass className="w-4 h-4 mr-2" />
-                Journal
+                Günlük
               </Link>
             </Button>
             
             <Button asChild className="rounded-full shadow-sm hover:shadow-md transition-all">
               <Link href="/places/new">
                 <Plus className="w-4 h-4 mr-1" />
-                Add Memory
+                Anı Ekle
               </Link>
             </Button>
           </nav>
@@ -42,23 +42,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      <footer className="border-t border-border/50 py-8 mt-auto text-center text-muted-foreground">
-        <p className="font-serif italic text-sm">Every place has a story to tell.</p>
+      <footer className="border-t border-border/50 py-10 mt-auto text-center text-muted-foreground space-y-2">
+        <p className="font-serif italic text-base text-foreground/70">
+          Seninle yeni yerler keşfetmeyi ve bu güzel anıları paylaşmayı çok seviyorum.
+        </p>
+        <p className="text-xs text-muted-foreground/50">Her yerin anlatacak bir hikayesi var.</p>
       </footer>
       
-      {/* Mobile nav bottom bar */}
       <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border p-2 px-6 flex justify-around items-center z-50 pb-safe">
         <Link href="/" className={`flex flex-col items-center p-2 rounded-lg ${location === '/' ? 'text-primary bg-primary/5' : 'text-muted-foreground'}`}>
           <Heart className="w-5 h-5 mb-1" />
-          <span className="text-[10px] font-medium">Home</span>
+          <span className="text-[10px] font-medium">Ana Sayfa</span>
         </Link>
         <Link href="/places" className={`flex flex-col items-center p-2 rounded-lg ${location === '/places' ? 'text-primary bg-primary/5' : 'text-muted-foreground'}`}>
           <Compass className="w-5 h-5 mb-1" />
-          <span className="text-[10px] font-medium">Journal</span>
+          <span className="text-[10px] font-medium">Günlük</span>
         </Link>
         <Link href="/places/new" className={`flex flex-col items-center p-2 rounded-lg ${location === '/places/new' ? 'text-primary bg-primary/5' : 'text-muted-foreground'}`}>
           <Plus className="w-5 h-5 mb-1" />
-          <span className="text-[10px] font-medium">Add</span>
+          <span className="text-[10px] font-medium">Ekle</span>
         </Link>
       </div>
     </div>

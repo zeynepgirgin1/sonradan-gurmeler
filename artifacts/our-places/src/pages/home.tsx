@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { MapPin, Globe, Map, Navigation, ArrowRight, Image as ImageIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
 
 export default function Home() {
   const { data: stats, isLoading: statsLoading } = useGetStats();
@@ -13,29 +12,29 @@ export default function Home() {
     <div className="max-w-5xl mx-auto space-y-12 pb-16 sm:pb-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <section className="text-center space-y-6 py-12">
         <h1 className="text-4xl sm:text-5xl md:text-6xl text-foreground">
-          Welcome to <span className="text-primary italic">Our Places</span>
+          Hoş geldin, <span className="text-primary italic">Bizim Yerlerimize</span>
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-light">
-          A personal travel journal for the memories we've made and the places we never want to forget.
+          Birlikte çıktığımız yolculukların kişisel günlüğü — hiç unutmak istemediğimiz anılar.
         </p>
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard 
           icon={<MapPin className="w-6 h-6 text-primary" />}
-          title="Places Visited"
+          title="Gezilen Yerler"
           value={stats?.totalPlaces}
           loading={statsLoading}
         />
         <StatCard 
           icon={<Globe className="w-6 h-6 text-secondary" />}
-          title="Countries Explored"
+          title="Keşfedilen Ülkeler"
           value={stats?.totalCountries}
           loading={statsLoading}
         />
         <StatCard 
           icon={<Navigation className="w-6 h-6 text-accent-foreground" />}
-          title="Cities Wandered"
+          title="Dolaşılan Şehirler"
           value={stats?.totalCities}
           loading={statsLoading}
         />
@@ -44,12 +43,12 @@ export default function Home() {
       <section className="space-y-6 pt-8 border-t border-border/50">
         <div className="flex items-end justify-between">
           <div>
-            <h2 className="text-2xl sm:text-3xl text-foreground">Recent Memories</h2>
-            <p className="text-muted-foreground mt-1">The latest chapters of our journey.</p>
+            <h2 className="text-2xl sm:text-3xl text-foreground">Son Anılar</h2>
+            <p className="text-muted-foreground mt-1">Yolculuğumuzun en yeni sayfaları.</p>
           </div>
           <Button variant="ghost" className="hidden sm:flex text-primary hover:text-primary/80" asChild>
             <Link href="/places">
-              View all <ArrowRight className="w-4 h-4 ml-2" />
+              Tümünü gör <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
         </div>
@@ -69,12 +68,12 @@ export default function Home() {
             <div className="bg-primary/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <Map className="w-8 h-8 text-primary/60" />
             </div>
-            <h3 className="text-xl font-serif mb-2">No memories yet</h3>
+            <h3 className="text-xl font-serif mb-2">Henüz anı yok</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Your travel journal is completely empty. It's time to log that amazing little cafe or the sunset you watched together.
+              Seyahat günlüğünüz tamamen boş. O güzel kafe ya da birlikte izlediğiniz gün batımını kaydetme vakti!
             </p>
             <Button asChild>
-              <Link href="/places/new">Add Your First Memory</Link>
+              <Link href="/places/new">İlk Anını Ekle</Link>
             </Button>
           </div>
         ) : (
@@ -97,7 +96,7 @@ export default function Home() {
                         <ImageIcon className="w-8 h-8 text-muted-foreground/30" />
                       </div>
                     )}
-                    <div className="absolute top-3 right-3 bg-background/90 backdrop-blur text-xs font-medium px-2 py-1 rounded-md text-foreground">
+                    <div className="absolute top-3 right-3 bg-background/90 backdrop-blur text-xs font-medium px-2 py-1 rounded-md text-foreground capitalize">
                       {place.category}
                     </div>
                   </div>
@@ -107,9 +106,8 @@ export default function Home() {
                       <MapPin className="w-3 h-3" />
                       {place.city}, {place.country}
                     </p>
-                    <div className="mt-auto pt-4 flex items-center justify-between text-xs text-muted-foreground border-t border-border/40">
-                      <span>{format(new Date(place.visitedAt), "MMMM d, yyyy")}</span>
-                      {place.rating && (
+                    {place.rating && (
+                      <div className="mt-auto pt-4 flex items-center justify-end border-t border-border/40">
                         <div className="flex gap-0.5">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <span key={i} className={`text-[10px] ${i < place.rating! ? "text-primary" : "text-muted"}`}>
@@ -117,8 +115,8 @@ export default function Home() {
                             </span>
                           ))}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Link>
@@ -129,7 +127,7 @@ export default function Home() {
         {recentPlaces && recentPlaces.length > 0 && (
           <div className="sm:hidden mt-6 text-center">
             <Button variant="outline" className="w-full" asChild>
-              <Link href="/places">View all memories</Link>
+              <Link href="/places">Tüm anıları gör</Link>
             </Button>
           </div>
         )}

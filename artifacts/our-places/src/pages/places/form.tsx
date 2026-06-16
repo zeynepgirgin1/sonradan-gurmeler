@@ -36,16 +36,27 @@ import {
 import { ArrowLeft, Save, MapPin } from "lucide-react";
 
 const PLACE_CATEGORIES = ["restaurant", "cafe", "park", "museum", "beach", "hotel", "bar", "attraction", "other"] as const;
-type PlaceInputCategory = typeof PLACE_CATEGORIES[number];
+type PlaceCategory = typeof PLACE_CATEGORIES[number];
+
+const CATEGORY_LABELS: Record<PlaceCategory, string> = {
+  restaurant: "Restoran",
+  cafe: "Kafe",
+  park: "Park",
+  museum: "Müze",
+  beach: "Sahil",
+  hotel: "Otel",
+  bar: "Bar",
+  attraction: "Gezilecek Yer",
+  other: "Diğer",
+};
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  city: z.string().min(1, "City is required"),
-  country: z.string().min(1, "Country is required"),
+  name: z.string().min(1, "İsim zorunludur"),
+  city: z.string().min(1, "Şehir zorunludur"),
+  country: z.string().min(1, "Ülke zorunludur"),
   description: z.string().optional(),
   category: z.enum(PLACE_CATEGORIES),
-  visitedAt: z.string().min(1, "Visit date is required"),
-  photoUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  photoUrl: z.string().url("Geçerli bir URL giriniz").optional().or(z.literal("")),
   rating: z.coerce.number().min(1).max(5).optional().or(z.literal(0)),
   lat: z.coerce.number().optional().or(z.literal("")),
   lng: z.coerce.number().optional().or(z.literal("")),
@@ -75,8 +86,7 @@ export default function PlaceForm() {
       city: "",
       country: "",
       description: "",
-      category: "other" as PlaceInputCategory,
-      visitedAt: format(new Date(), "yyyy-MM-dd"),
+      category: "other",
       photoUrl: "",
       rating: 0,
       lat: "",
@@ -91,8 +101,7 @@ export default function PlaceForm() {
         city: place.city,
         country: place.country,
         description: place.description || "",
-        category: place.category as PlaceInputCategory || "other",
-        visitedAt: place.visitedAt.split('T')[0],
+        category: (place.category as PlaceCategory) || "other",
         photoUrl: place.photoUrl || "",
         rating: place.rating || 0,
         lat: place.lat || "",
@@ -105,9 +114,10 @@ export default function PlaceForm() {
   const updateMutation = useUpdatePlace();
 
   const onSubmit = (data: FormValues) => {
-    // Clean up empty optional fields
+    const today = format(new Date(), "yyyy-MM-dd");
     const payload = {
       ...data,
+      visitedAt: today,
       photoUrl: data.photoUrl || undefined,
       rating: data.rating ? data.rating : undefined,
       lat: data.lat === "" ? undefined : Number(data.lat),
@@ -117,18 +127,18 @@ export default function PlaceForm() {
     if (isEdit) {
       updateMutation.mutate({ id: placeId, data: payload }, {
         onSuccess: () => {
-          toast({ title: "Memory updated successfully." });
+          toast({ title: "Anı güncellendi." });
           invalidateAndRedirect(`/places/${placeId}`);
         },
-        onError: () => toast({ title: "Failed to update memory", variant: "destructive" })
+        onError: () => toast({ title: "Güncellenemedi", variant: "destructive" })
       });
     } else {
       createMutation.mutate({ data: payload }, {
         onSuccess: (newPlace) => {
-          toast({ title: "New memory added!" });
+          toast({ title: "Yeni anı eklendi!" });
           invalidateAndRedirect(`/places/${newPlace.id}`);
         },
-        onError: () => toast({ title: "Failed to add memory", variant: "destructive" })
+        onError: () => toast({ title: "Eklenemedi", variant: "destructive" })
       });
     }
   };
@@ -143,24 +153,24 @@ export default function PlaceForm() {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   if (isEdit && isLoadingPlace) {
-    return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
+    return <div className="p-8 text-center text-muted-foreground">Yükleniyor...</div>;
   }
 
   return (
     <div className="max-w-3xl mx-auto pb-20 sm:pb-0 animate-in fade-in duration-500">
       <Button variant="ghost" className="mb-6 -ml-4 text-muted-foreground" asChild>
         <Link href={isEdit ? `/places/${placeId}` : "/places"}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back
+          <ArrowLeft className="w-4 h-4 mr-2" /> Geri
         </Link>
       </Button>
 
       <div className="bg-card border border-border/50 rounded-3xl p-6 md:p-10 shadow-sm">
         <div className="mb-8">
           <h1 className="text-3xl font-serif text-foreground mb-2">
-            {isEdit ? "Edit Memory" : "Log a New Place"}
+            {isEdit ? "Anıyı Düzenle" : "Yeni Yer Ekle"}
           </h1>
           <p className="text-muted-foreground">
-            {isEdit ? "Update the details of your visit." : "Save the details of a place you explored together."}
+            {isEdit ? "Ziyaretin detaylarını güncelle." : "Birlikte keşfettiğin yeri kaydet."}
           </p>
         </div>
 
@@ -172,9 +182,9 @@ export default function PlaceForm() {
                 name="name"
                 render={({ field }) => (
                   <FormItem className="md:col-span-2">
-                    <FormLabel>Place Name</FormLabel>
+                    <FormLabel>Yer Adı</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. The Little Red Cafe" className="bg-background text-lg py-6" {...field} />
+                      <Input placeholder="örn. Küçük Kırmızı Kafe" className="bg-background text-lg py-6" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -186,9 +196,9 @@ export default function PlaceForm() {
                 name="city"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>City</FormLabel>
+                    <FormLabel>Şehir</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Paris" className="bg-background" {...field} />
+                      <Input placeholder="örn. İstanbul" className="bg-background" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -200,9 +210,9 @@ export default function PlaceForm() {
                 name="country"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Country</FormLabel>
+                    <FormLabel>Ülke</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. France" className="bg-background" {...field} />
+                      <Input placeholder="örn. Türkiye" className="bg-background" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -214,16 +224,16 @@ export default function PlaceForm() {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>Kategori</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-background capitalize">
-                          <SelectValue placeholder="Select a category" />
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="Kategori seç" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {PLACE_CATEGORIES.map((cat) => (
-                          <SelectItem key={cat} value={cat} className="capitalize">{cat}</SelectItem>
+                          <SelectItem key={cat} value={cat}>{CATEGORY_LABELS[cat]}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -234,13 +244,14 @@ export default function PlaceForm() {
 
               <FormField
                 control={form.control}
-                name="visitedAt"
+                name="rating"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date Visited</FormLabel>
+                    <FormLabel>Puan (1-5)</FormLabel>
                     <FormControl>
-                      <Input type="date" className="bg-background" {...field} />
+                      <Input type="number" min={0} max={5} className="bg-background" {...field} />
                     </FormControl>
+                    <FormDescription>Puan vermek istemiyorsan 0 bırak.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -252,10 +263,10 @@ export default function PlaceForm() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>The Memory</FormLabel>
+                  <FormLabel>Anı</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="What made this place special? What did you eat? How did it feel?" 
+                      placeholder="Bu yeri özel kılan ne? Ne yediniz? Nasıl hissettirdi?" 
                       className="min-h-[120px] bg-background resize-y" 
                       {...field} 
                     />
@@ -268,29 +279,14 @@ export default function PlaceForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-border/50 pt-8 mt-8">
               <FormField
                 control={form.control}
-                name="rating"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Rating (1-5)</FormLabel>
-                    <FormControl>
-                      <Input type="number" min={0} max={5} className="bg-background" {...field} />
-                    </FormControl>
-                    <FormDescription>Leave at 0 if no rating.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="photoUrl"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Photo URL</FormLabel>
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Fotoğraf URL</FormLabel>
                     <FormControl>
                       <Input type="url" placeholder="https://..." className="bg-background" {...field} />
                     </FormControl>
-                    <FormDescription>Link to an image from your trip.</FormDescription>
+                    <FormDescription>Geziden bir fotoğrafın bağlantısı.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -299,16 +295,16 @@ export default function PlaceForm() {
               <div className="md:col-span-2 grid grid-cols-2 gap-6 p-4 bg-muted/50 rounded-xl border border-border/40">
                 <div className="col-span-2 flex items-center gap-2 mb-2 text-sm font-medium text-foreground">
                   <MapPin className="w-4 h-4 text-primary" />
-                  Exact Coordinates (Optional)
+                  Koordinatlar (İsteğe Bağlı)
                 </div>
                 <FormField
                   control={form.control}
                   name="lat"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">Latitude</FormLabel>
+                      <FormLabel className="text-xs">Enlem</FormLabel>
                       <FormControl>
-                        <Input type="number" step="any" placeholder="48.8566" className="bg-background h-9" {...field} />
+                        <Input type="number" step="any" placeholder="41.0082" className="bg-background h-9" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -319,9 +315,9 @@ export default function PlaceForm() {
                   name="lng"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">Longitude</FormLabel>
+                      <FormLabel className="text-xs">Boylam</FormLabel>
                       <FormControl>
-                        <Input type="number" step="any" placeholder="2.3522" className="bg-background h-9" {...field} />
+                        <Input type="number" step="any" placeholder="28.9784" className="bg-background h-9" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -332,12 +328,12 @@ export default function PlaceForm() {
 
             <div className="pt-4 flex justify-end gap-3">
               <Button type="button" variant="outline" asChild>
-                <Link href={isEdit ? `/places/${placeId}` : "/places"}>Cancel</Link>
+                <Link href={isEdit ? `/places/${placeId}` : "/places"}>Vazgeç</Link>
               </Button>
               <Button type="submit" disabled={isPending} className="min-w-[120px]">
-                {isPending ? "Saving..." : (
+                {isPending ? "Kaydediliyor..." : (
                   <>
-                    <Save className="w-4 h-4 mr-2" /> {isEdit ? "Update Memory" : "Save Memory"}
+                    <Save className="w-4 h-4 mr-2" /> {isEdit ? "Güncelle" : "Kaydet"}
                   </>
                 )}
               </Button>

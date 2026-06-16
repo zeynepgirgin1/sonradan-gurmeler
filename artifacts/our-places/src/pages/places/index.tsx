@@ -4,15 +4,28 @@ import { useListPlaces } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Search, Calendar, Image as ImageIcon, Filter } from "lucide-react";
-import { format } from "date-fns";
+import { MapPin, Search, Image as ImageIcon, Filter } from "lucide-react";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  all: "Tümü",
+  restaurant: "Restoran",
+  cafe: "Kafe",
+  park: "Park",
+  museum: "Müze",
+  beach: "Sahil",
+  hotel: "Otel",
+  bar: "Bar",
+  attraction: "Gezilecek Yer",
+  other: "Diğer",
+};
+
+const PLACE_CATEGORIES = ["restaurant", "cafe", "park", "museum", "beach", "hotel", "bar", "attraction", "other"] as const;
 
 export default function PlacesList() {
   const { data: places, isLoading } = useListPlaces();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
-  const PLACE_CATEGORIES = ["restaurant", "cafe", "park", "museum", "beach", "hotel", "bar", "attraction", "other"] as const;
   const categories = ["all", ...PLACE_CATEGORIES];
 
   const filteredPlaces = places?.filter(place => {
@@ -30,15 +43,15 @@ export default function PlacesList() {
     <div className="max-w-6xl mx-auto space-y-8 pb-20 sm:pb-0 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-border/50 pb-6">
         <div>
-          <h1 className="text-4xl font-serif text-foreground mb-2">Our Journal</h1>
-          <p className="text-muted-foreground">Every place we've explored, collected in one place.</p>
+          <h1 className="text-4xl font-serif text-foreground mb-2">Günlüğümüz</h1>
+          <p className="text-muted-foreground">Birlikte keşfettiğimiz her yer, bir arada.</p>
         </div>
         
         <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
-              placeholder="Search places, cities..." 
+              placeholder="Yer, şehir ara..." 
               className="pl-9 bg-card border-border/60"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -57,7 +70,7 @@ export default function PlacesList() {
             onClick={() => setCategoryFilter(cat)}
             className="capitalize rounded-full whitespace-nowrap"
           >
-            {cat}
+            {CATEGORY_LABELS[cat] ?? cat}
           </Button>
         ))}
       </div>
@@ -74,10 +87,10 @@ export default function PlacesList() {
         </div>
       ) : filteredPlaces?.length === 0 ? (
         <div className="text-center py-24 bg-card/30 rounded-2xl border border-dashed border-border">
-          <p className="text-lg text-muted-foreground mb-4">No places found matching your filters.</p>
+          <p className="text-lg text-muted-foreground mb-4">Filtrelerinize uygun yer bulunamadı.</p>
           {(search || categoryFilter !== "all") && (
             <Button variant="outline" onClick={() => { setSearch(""); setCategoryFilter("all"); }}>
-              Clear Filters
+              Filtreleri Temizle
             </Button>
           )}
         </div>
@@ -102,7 +115,7 @@ export default function PlacesList() {
                     </div>
                   )}
                   <div className="absolute top-3 left-3 bg-background/90 backdrop-blur text-xs font-medium px-2 py-1 rounded-md text-foreground capitalize shadow-sm">
-                    {place.category}
+                    {CATEGORY_LABELS[place.category] ?? place.category}
                   </div>
                 </div>
                 <div className="p-4 flex-1 flex flex-col">
@@ -118,12 +131,8 @@ export default function PlacesList() {
                     </p>
                   )}
                   
-                  <div className="mt-auto pt-3 flex items-center justify-between text-xs text-muted-foreground border-t border-border/40">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {format(new Date(place.visitedAt), "MMM yyyy")}
-                    </span>
-                    {place.rating && (
+                  {place.rating && (
+                    <div className="mt-auto pt-3 flex items-center justify-end border-t border-border/40">
                       <div className="flex gap-[1px]">
                         {Array.from({ length: 5 }).map((_, i) => (
                           <span key={i} className={`text-[11px] ${i < place.rating! ? "text-primary" : "text-muted"}`}>
@@ -131,8 +140,8 @@ export default function PlacesList() {
                           </span>
                         ))}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </Link>
