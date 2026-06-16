@@ -13,7 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="bg-primary/10 p-2 rounded-full group-hover:bg-primary/20 transition-colors">
               <Heart className="w-5 h-5 text-primary" />
             </div>
-            <span className="font-serif text-xl font-medium tracking-tight text-foreground">Bizim Yerlerimiz</span>
+            <span className="font-serif text-xl font-medium tracking-tight text-foreground">Sonradan Gurmeler</span>
           </Link>
 
           <nav className="flex items-center gap-1 sm:gap-4">

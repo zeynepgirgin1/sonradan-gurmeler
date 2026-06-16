@@ -12,24 +12,18 @@ export default function Home() {
     <div className="max-w-5xl mx-auto space-y-12 pb-16 sm:pb-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <section className="text-center space-y-6 py-12">
         <h1 className="text-4xl sm:text-5xl md:text-6xl text-foreground">
-          Hoş geldin, <span className="text-primary italic">Bizim Yerlerimize</span>
+          Hoş geldin, <span className="text-primary italic">Sonradan Gurmeler'e</span>
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-light">
-          Birlikte çıktığımız yolculukların kişisel günlüğü — hiç unutmak istemediğimiz anılar.
+          Seninle yediğim her yemek benim en güzel yemeğim.
         </p>
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <StatCard 
           icon={<MapPin className="w-6 h-6 text-primary" />}
           title="Gezilen Yerler"
           value={stats?.totalPlaces}
-          loading={statsLoading}
-        />
-        <StatCard 
-          icon={<Globe className="w-6 h-6 text-secondary" />}
-          title="Keşfedilen Ülkeler"
-          value={stats?.totalCountries}
           loading={statsLoading}
         />
         <StatCard 
