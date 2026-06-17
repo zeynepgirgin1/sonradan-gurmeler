@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,7 +33,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Save, MapPin } from "lucide-react";
+import { ArrowLeft, Save, MapPin, Upload, X, ImageIcon } from "lucide-react";
+import { useUpload } from "@workspace/object-storage-web";
 
 const PLACE_CATEGORIES = ["restaurant", "cafe", "park", "museum", "beach", "hotel", "bar", "attraction", "other"] as const;
 type PlaceCategory = typeof PLACE_CATEGORIES[number];
@@ -56,7 +57,7 @@ const formSchema = z.object({
   country: z.string().min(1, "Ülke zorunludur"),
   description: z.string().optional(),
   category: z.enum(PLACE_CATEGORIES),
-  photoUrl: z.string().url("Geçerli bir URL giriniz").optional().or(z.literal("")),
+  photoUrl: z.string().optional().or(z.literal("")),
   rating: z.coerce.number().min(1).max(5).optional().or(z.literal(0)),
   lat: z.coerce.number().optional().or(z.literal("")),
   lng: z.coerce.number().optional().or(z.literal("")),
@@ -71,6 +72,8 @@ export default function PlaceForm() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const { data: place, isLoading: isLoadingPlace } = useGetPlace(placeId, {
     query: {
@@ -107,8 +110,38 @@ export default function PlaceForm() {
         lat: place.lat || "",
         lng: place.lng || "",
       });
+      if (place.photoUrl) {
+        setPreviewUrl(place.photoUrl);
+      }
     }
   }, [place, isEdit, form]);
+
+  const { uploadFile, isUploading, progress } = useUpload({
+    onSuccess: (response) => {
+      const objectUrl = `/api/storage/objects${response.objectPath.replace(/^\/objects/, "")}`;
+      form.setValue("photoUrl", objectUrl);
+      toast({ title: "Fotoğraf yüklendi!" });
+    },
+    onError: () => {
+      toast({ title: "Fotoğraf yüklenemedi", variant: "destructive" });
+    },
+  });
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const localPreview = URL.createObjectURL(file);
+    setPreviewUrl(localPreview);
+
+    await uploadFile(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setPreviewUrl(null);
+    form.setValue("photoUrl", "");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const createMutation = useCreatePlace();
   const updateMutation = useUpdatePlace();
@@ -277,20 +310,79 @@ export default function PlaceForm() {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-border/50 pt-8 mt-8">
-              <FormField
-                control={form.control}
-                name="photoUrl"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Fotoğraf URL</FormLabel>
-                    <FormControl>
-                      <Input type="url" placeholder="https://..." className="bg-background" {...field} />
-                    </FormControl>
-                    <FormDescription>Geziden bir fotoğrafın bağlantısı.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium leading-none mb-3 block">Fotoğraf</label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+
+                {previewUrl ? (
+                  <div className="relative rounded-2xl overflow-hidden border border-border/50 bg-muted/30">
+                    <img
+                      src={previewUrl}
+                      alt="Fotoğraf önizlemesi"
+                      className="w-full max-h-64 object-cover"
+                    />
+                    {isUploading && (
+                      <div className="absolute inset-0 bg-background/70 flex flex-col items-center justify-center gap-2">
+                        <div className="text-sm font-medium text-foreground">Yükleniyor... %{progress}</div>
+                        <div className="w-48 h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary transition-all duration-300"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {!isUploading && (
+                      <div className="absolute top-3 right-3 flex gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="h-8 px-3 text-xs shadow-md"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Upload className="w-3 h-3 mr-1.5" /> Değiştir
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="destructive"
+                          className="h-8 w-8 p-0 shadow-md"
+                          onClick={handleRemovePhoto}
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full flex flex-col items-center justify-center gap-3 py-10 rounded-2xl border-2 border-dashed border-border/60 bg-muted/20 hover:bg-muted/40 hover:border-primary/40 transition-colors cursor-pointer"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                      <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-foreground">Fotoğraf yükle</p>
+                      <p className="text-xs text-muted-foreground mt-1">Galeriden veya kameradan seç</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium">
+                      <Upload className="w-4 h-4" /> Dosya Seç
+                    </div>
+                  </button>
                 )}
-              />
+                <p className="text-sm text-muted-foreground mt-2">
+                  Telefonundan veya bilgisayarından fotoğraf yükleyebilirsin.
+                </p>
+              </div>
 
               <div className="md:col-span-2 grid grid-cols-2 gap-6 p-4 bg-muted/50 rounded-xl border border-border/40">
                 <div className="col-span-2 flex items-center gap-2 mb-2 text-sm font-medium text-foreground">
@@ -330,7 +422,7 @@ export default function PlaceForm() {
               <Button type="button" variant="outline" asChild>
                 <Link href={isEdit ? `/places/${placeId}` : "/places"}>Vazgeç</Link>
               </Button>
-              <Button type="submit" disabled={isPending} className="min-w-[120px]">
+              <Button type="submit" disabled={isPending || isUploading} className="min-w-[120px]">
                 {isPending ? "Kaydediliyor..." : (
                   <>
                     <Save className="w-4 h-4 mr-2" /> {isEdit ? "Güncelle" : "Kaydet"}

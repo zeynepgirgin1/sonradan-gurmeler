@@ -13,5 +13,8 @@ export * from './placeInput';
 export * from './placeInputCategory';
 export * from './placeUpdate';
 export * from './placeUpdateCategory';
+export * from './requestUploadUrlBody';
+export * from './requestUploadUrlResponse';
+export * from './requestUploadUrlResponseMetadata';
 export * from './stats';
 export * from './statsCategoryCounts';

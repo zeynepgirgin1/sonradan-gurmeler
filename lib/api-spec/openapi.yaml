@@ -13,6 +13,8 @@ tags:
     description: Places operations
   - name: stats
     description: Stats operations
+  - name: storage
+    description: Object storage operations
 paths:
   /healthz:
     get:
@@ -133,6 +135,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/Stats"
 
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a presigned upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestUploadUrlBody"
+      responses:
+        "200":
+          description: Presigned upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestUploadUrlResponse"
+
   /places/recent:
     get:
       operationId: getRecentPlaces
@@ -252,6 +273,35 @@ components:
           type: number
         lng:
           type: number
+
+    RequestUploadUrlBody:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+        contentType:
+          type: string
+
+    RequestUploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL:
+          type: string
+        objectPath:
+          type: string
+        metadata:
+          type: object
+          properties:
+            name:
+              type: string
+            size:
+              type: integer
+            contentType:
+              type: string
 
     Stats:
       type: object
