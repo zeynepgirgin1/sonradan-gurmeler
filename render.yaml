@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: sonradan-gurmeler
+    runtime: node
+    buildCommand: bash build.sh
+    startCommand: bash start.sh
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
