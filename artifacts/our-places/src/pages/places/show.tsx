@@ -136,9 +136,20 @@ export default function PlaceDetail() {
               </div>
 
               {(place.lat && place.lng) && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-6 border-t border-border/40">
-                  <Navigation className="w-4 h-4 text-secondary" />
-                  {place.lat.toFixed(4)}, {place.lng.toFixed(4)}
+                <div className="pt-6 border-t border-border/40 space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Navigation className="w-4 h-4 text-secondary" />
+                    {place.lat.toFixed(4)}, {place.lng.toFixed(4)}
+                  </div>
+                  <a
+                    href={`https://www.google.com/maps?q=${place.lat},${place.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-medium"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    Google Haritalar'da Aç
+                  </a>
                 </div>
               )}
             </div>
