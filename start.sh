@@ -5,4 +5,4 @@ echo "==> Running database migrations..."
 pnpm --filter @workspace/db run push-force || true
 
 echo "==> Starting server..."
-exec node artifacts/api-server/dist/index.mjs
+PORT=${PORT:-10000} exec node artifacts/api-server/dist/index.mjs
