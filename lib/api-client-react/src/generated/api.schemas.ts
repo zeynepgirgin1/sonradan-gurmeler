@@ -24,6 +24,14 @@ export const PlaceCategory = {
   other: 'other',
 } as const;
 
+export type PlaceStatus = typeof PlaceStatus[keyof typeof PlaceStatus];
+
+
+export const PlaceStatus = {
+  visited: 'visited',
+  planned: 'planned',
+} as const;
+
 export interface Place {
   id: number;
   name: string;
@@ -41,6 +49,7 @@ export interface Place {
   lat?: number | null;
   /** @nullable */
   lng?: number | null;
+  status: PlaceStatus;
   createdAt: string;
 }
 
@@ -57,6 +66,14 @@ export const PlaceInputCategory = {
   bar: 'bar',
   attraction: 'attraction',
   other: 'other',
+} as const;
+
+export type PlaceInputStatus = typeof PlaceInputStatus[keyof typeof PlaceInputStatus];
+
+
+export const PlaceInputStatus = {
+  visited: 'visited',
+  planned: 'planned',
 } as const;
 
 export interface PlaceInput {
@@ -77,6 +94,7 @@ export interface PlaceInput {
   rating?: number;
   lat?: number;
   lng?: number;
+  status?: PlaceInputStatus;
 }
 
 export type PlaceUpdateCategory = typeof PlaceUpdateCategory[keyof typeof PlaceUpdateCategory];
@@ -92,6 +110,14 @@ export const PlaceUpdateCategory = {
   bar: 'bar',
   attraction: 'attraction',
   other: 'other',
+} as const;
+
+export type PlaceUpdateStatus = typeof PlaceUpdateStatus[keyof typeof PlaceUpdateStatus];
+
+
+export const PlaceUpdateStatus = {
+  visited: 'visited',
+  planned: 'planned',
 } as const;
 
 export interface PlaceUpdate {
@@ -112,6 +138,7 @@ export interface PlaceUpdate {
   rating?: number;
   lat?: number;
   lng?: number;
+  status?: PlaceUpdateStatus;
 }
 
 export interface RequestUploadUrlBody {

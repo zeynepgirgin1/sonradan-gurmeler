@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { PlaceCategory } from './placeCategory';
+import type { PlaceStatus } from './placeStatus';
 
 export interface Place {
   id: number;
@@ -24,5 +25,6 @@ export interface Place {
   lat?: number | null;
   /** @nullable */
   lng?: number | null;
+  status: PlaceStatus;
   createdAt: Date;
 }

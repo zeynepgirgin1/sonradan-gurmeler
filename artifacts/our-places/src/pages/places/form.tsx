@@ -51,6 +51,9 @@ const CATEGORY_LABELS: Record<PlaceCategory, string> = {
   other: "Diğer",
 };
 
+const PLACE_STATUSES = ["visited", "planned"] as const;
+type PlaceStatus = typeof PLACE_STATUSES[number];
+
 const formSchema = z.object({
   name: z.string().min(1, "İsim zorunludur"),
   city: z.string().min(1, "Şehir zorunludur"),
@@ -61,6 +64,7 @@ const formSchema = z.object({
   rating: z.coerce.number().min(1).max(5).optional().or(z.literal(0)),
   lat: z.coerce.number().optional().or(z.literal("")),
   lng: z.coerce.number().optional().or(z.literal("")),
+  status: z.enum(PLACE_STATUSES),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -94,6 +98,7 @@ export default function PlaceForm() {
       rating: 0,
       lat: "",
       lng: "",
+      status: "visited" as PlaceStatus,
     },
   });
 
@@ -109,6 +114,7 @@ export default function PlaceForm() {
         rating: place.rating || 0,
         lat: place.lat || "",
         lng: place.lng || "",
+        status: (place.status as PlaceStatus) || "visited",
       });
       if (place.photoUrl) {
         setPreviewUrl(place.photoUrl);
@@ -285,6 +291,43 @@ export default function PlaceForm() {
                       <Input type="number" min={0} max={5} className="bg-background" {...field} />
                     </FormControl>
                     <FormDescription>Puan vermek istemiyorsan 0 bırak.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Durum</FormLabel>
+                    <FormControl>
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => field.onChange("visited")}
+                          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                            field.value === "visited"
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border bg-background text-muted-foreground hover:border-primary/40"
+                          }`}
+                        >
+                          <span className="text-base">✅</span> Gezildi
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => field.onChange("planned")}
+                          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                            field.value === "planned"
+                              ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400"
+                              : "border-border bg-background text-muted-foreground hover:border-amber-400/40"
+                          }`}
+                        >
+                          <span className="text-base">🔖</span> Gelecek Planı
+                        </button>
+                      </div>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

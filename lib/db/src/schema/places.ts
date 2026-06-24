@@ -14,6 +14,7 @@ export const placesTable = pgTable("places", {
   rating: integer("rating"),
   lat: real("lat"),
   lng: real("lng"),
+  status: text("status").notNull().default("visited"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

@@ -181,7 +181,7 @@ components:
 
     Place:
       type: object
-      required: [id, name, city, country, visitedAt, createdAt]
+      required: [id, name, city, country, visitedAt, createdAt, status]
       properties:
         id:
           type: integer
@@ -207,6 +207,10 @@ components:
           type: ["number", "null"]
         lng:
           type: ["number", "null"]
+        status:
+          type: string
+          enum: [visited, planned]
+          default: visited
         createdAt:
           type: string
           format: date-time
@@ -242,6 +246,9 @@ components:
           type: number
         lng:
           type: number
+        status:
+          type: string
+          enum: [visited, planned]
 
     PlaceUpdate:
       type: object
@@ -273,6 +280,9 @@ components:
           type: number
         lng:
           type: number
+        status:
+          type: string
+          enum: [visited, planned]
 
     RequestUploadUrlBody:
       type: object

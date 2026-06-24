@@ -1,9 +1,9 @@
 import { useParams, Link, useLocation } from "wouter";
-import { useGetPlace, useDeletePlace, getListPlacesQueryKey, getGetRecentPlacesQueryKey, getGetStatsQueryKey } from "@workspace/api-client-react";
+import { useGetPlace, useDeletePlace, useUpdatePlace, getListPlacesQueryKey, getGetRecentPlacesQueryKey, getGetStatsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Edit3, Trash2, ArrowLeft, Image as ImageIcon, Navigation } from "lucide-react";
+import { MapPin, Edit3, Trash2, ArrowLeft, Image as ImageIcon, Navigation, CheckCircle2, BookmarkIcon } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +44,7 @@ export default function PlaceDetail() {
   });
 
   const deleteMutation = useDeletePlace();
+  const updateMutation = useUpdatePlace();
 
   const handleDelete = () => {
     deleteMutation.mutate({ id: placeId }, {
@@ -56,6 +57,19 @@ export default function PlaceDetail() {
       },
       onError: () => {
         toast({ title: "Silinemedi", variant: "destructive" });
+      }
+    });
+  };
+
+  const handleMarkVisited = () => {
+    updateMutation.mutate({ id: placeId, data: { status: "visited" } }, {
+      onSuccess: () => {
+        toast({ title: "🎉 Gezildi olarak işaretlendi!" });
+        queryClient.invalidateQueries({ queryKey: [`/api/places/${placeId}`] });
+        queryClient.invalidateQueries({ queryKey: getListPlacesQueryKey() });
+      },
+      onError: () => {
+        toast({ title: "Güncellenemedi", variant: "destructive" });
       }
     });
   };
@@ -79,6 +93,8 @@ export default function PlaceDetail() {
       </div>
     );
   }
+
+  const isPlanned = place.status === "planned";
 
   return (
     <div className="max-w-4xl mx-auto pb-20 sm:pb-0 animate-in fade-in duration-500">
@@ -114,6 +130,15 @@ export default function PlaceDetail() {
                   {place.rating} ★
                 </span>
               )}
+              {isPlanned ? (
+                <span className="bg-amber-400/30 backdrop-blur-md border border-amber-300/40 px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
+                  <BookmarkIcon className="w-3 h-3" /> Gelecek Planı
+                </span>
+              ) : (
+                <span className="bg-emerald-400/30 backdrop-blur-md border border-emerald-300/40 px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3 h-3" /> Gezildi
+                </span>
+              )}
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-white mb-2 leading-tight">
               {place.name}
@@ -126,6 +151,24 @@ export default function PlaceDetail() {
         </div>
 
         <div className="p-6 md:p-10">
+          {isPlanned && (
+            <div className="mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 flex items-center justify-between gap-4">
+              <div>
+                <p className="font-medium text-amber-800 dark:text-amber-300 text-sm">🔖 Planlandı</p>
+                <p className="text-amber-700/70 dark:text-amber-400/70 text-xs mt-0.5">Bu yeri henüz ziyaret etmediniz. Gittiğinizde işaretleyebilirsiniz.</p>
+              </div>
+              <Button
+                size="sm"
+                className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white border-0"
+                onClick={handleMarkVisited}
+                disabled={updateMutation.isPending}
+              >
+                <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                {updateMutation.isPending ? "..." : "Gezildi!"}
+              </Button>
+            </div>
+          )}
+
           <div className="flex flex-col md:flex-row gap-10">
             <div className="flex-1 space-y-8">
               <div>

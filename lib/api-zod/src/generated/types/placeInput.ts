@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { PlaceInputCategory } from './placeInputCategory';
+import type { PlaceInputStatus } from './placeInputStatus';
 
 export interface PlaceInput {
   /** @minLength 1 */
@@ -25,4 +26,5 @@ export interface PlaceInput {
   rating?: number;
   lat?: number;
   lng?: number;
+  status?: PlaceInputStatus;
 }

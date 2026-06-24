@@ -19,6 +19,8 @@ export const HealthCheckResponse = zod.object({
 /**
  * @summary List all places
  */
+export const listPlacesResponseStatusDefault = `visited`;
+
 export const ListPlacesResponseItem = zod.object({
   "id": zod.number(),
   "name": zod.string(),
@@ -31,6 +33,7 @@ export const ListPlacesResponseItem = zod.object({
   "rating": zod.number().nullish(),
   "lat": zod.number().nullish(),
   "lng": zod.number().nullish(),
+  "status": zod.enum(['visited', 'planned']).default(listPlacesResponseStatusDefault),
   "createdAt": zod.coerce.date()
 })
 export const ListPlacesResponse = zod.array(ListPlacesResponseItem)
@@ -56,7 +59,8 @@ export const CreatePlaceBody = zod.object({
   "photoUrl": zod.string().optional(),
   "rating": zod.number().min(1).max(createPlaceBodyRatingMax).optional(),
   "lat": zod.number().optional(),
-  "lng": zod.number().optional()
+  "lng": zod.number().optional(),
+  "status": zod.enum(['visited', 'planned']).optional()
 })
 
 
@@ -66,6 +70,8 @@ export const CreatePlaceBody = zod.object({
 export const GetPlaceParams = zod.object({
   "id": zod.coerce.number()
 })
+
+export const getPlaceResponseStatusDefault = `visited`;
 
 export const GetPlaceResponse = zod.object({
   "id": zod.number(),
@@ -79,6 +85,7 @@ export const GetPlaceResponse = zod.object({
   "rating": zod.number().nullish(),
   "lat": zod.number().nullish(),
   "lng": zod.number().nullish(),
+  "status": zod.enum(['visited', 'planned']).default(getPlaceResponseStatusDefault),
   "createdAt": zod.coerce.date()
 })
 
@@ -107,8 +114,11 @@ export const UpdatePlaceBody = zod.object({
   "photoUrl": zod.string().optional(),
   "rating": zod.number().min(1).max(updatePlaceBodyRatingMax).optional(),
   "lat": zod.number().optional(),
-  "lng": zod.number().optional()
+  "lng": zod.number().optional(),
+  "status": zod.enum(['visited', 'planned']).optional()
 })
+
+export const updatePlaceResponseStatusDefault = `visited`;
 
 export const UpdatePlaceResponse = zod.object({
   "id": zod.number(),
@@ -122,6 +132,7 @@ export const UpdatePlaceResponse = zod.object({
   "rating": zod.number().nullish(),
   "lat": zod.number().nullish(),
   "lng": zod.number().nullish(),
+  "status": zod.enum(['visited', 'planned']).default(updatePlaceResponseStatusDefault),
   "createdAt": zod.coerce.date()
 })
 
@@ -170,6 +181,8 @@ export const RequestUploadUrlResponse = zod.object({
 /**
  * @summary Get most recently visited places
  */
+export const getRecentPlacesResponseStatusDefault = `visited`;
+
 export const GetRecentPlacesResponseItem = zod.object({
   "id": zod.number(),
   "name": zod.string(),
@@ -182,6 +195,7 @@ export const GetRecentPlacesResponseItem = zod.object({
   "rating": zod.number().nullish(),
   "lat": zod.number().nullish(),
   "lng": zod.number().nullish(),
+  "status": zod.enum(['visited', 'planned']).default(getRecentPlacesResponseStatusDefault),
   "createdAt": zod.coerce.date()
 })
 export const GetRecentPlacesResponse = zod.array(GetRecentPlacesResponseItem)

@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { PlaceUpdateCategory } from './placeUpdateCategory';
+import type { PlaceUpdateStatus } from './placeUpdateStatus';
 
 export interface PlaceUpdate {
   /** @minLength 1 */
@@ -25,4 +26,5 @@ export interface PlaceUpdate {
   rating?: number;
   lat?: number;
   lng?: number;
+  status?: PlaceUpdateStatus;
 }
