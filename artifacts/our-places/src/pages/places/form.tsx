@@ -34,7 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, Save, MapPin, Upload, X, ImageIcon } from "lucide-react";
-import { useUpload } from "@workspace/object-storage-web";
+import { useCloudinaryUpload } from "@/hooks/use-cloudinary-upload";
 
 const PLACE_CATEGORIES = ["restaurant", "cafe", "park", "museum", "beach", "hotel", "bar", "attraction", "other"] as const;
 type PlaceCategory = typeof PLACE_CATEGORIES[number];
@@ -122,10 +122,9 @@ export default function PlaceForm() {
     }
   }, [place, isEdit, form]);
 
-  const { uploadFile, isUploading, progress } = useUpload({
-    onSuccess: (response) => {
-      const objectUrl = `/api/storage/objects${response.objectPath.replace(/^\/objects/, "")}`;
-      form.setValue("photoUrl", objectUrl);
+  const { uploadFile, isUploading, progress } = useCloudinaryUpload({
+    onSuccess: (url) => {
+      form.setValue("photoUrl", url);
       toast({ title: "Fotoğraf yüklendi!" });
     },
     onError: () => {
